@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
+import QRCode from "react-native-qrcode-svg";
 import { useWalletStore } from "../../store/useWalletStore";
 
 function maskAddress(address: string) {
@@ -31,8 +32,16 @@ export function ReceiveScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Receive funds</Text>
       <Text style={styles.subtitle}>
-        Share this address to receive assets into your wallet.
+        Share this address or QR code to receive assets into your wallet.
       </Text>
+
+      <View style={styles.qrCard}>
+        {activeWallet?.address ? (
+          <QRCode value={activeWallet.address} size={220} />
+        ) : (
+          <Text style={styles.emptyText}>No address available</Text>
+        )}
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.label}>Wallet</Text>
@@ -75,6 +84,15 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 24,
   },
+  qrCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 20,
+  },
   card: {
     backgroundColor: "#111827",
     borderRadius: 16,
@@ -95,6 +113,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14,
     lineHeight: 22,
+  },
+  emptyText: {
+    color: "#111827",
+    fontSize: 14,
   },
   button: {
     backgroundColor: "#2563EB",
