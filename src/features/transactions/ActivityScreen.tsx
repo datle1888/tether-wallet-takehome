@@ -2,6 +2,7 @@ import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import type { TransactionItem } from "../../types/transaction";
 import { useWalletStore } from "../../store/useWalletStore";
+import { EmptyState } from "../../components/EmptyState";
 
 function maskAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -59,12 +60,10 @@ export function ActivityScreen() {
       </Text>
 
       {!transactions.length ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No transactions yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Your wallet activity will appear here once transfers happen.
-          </Text>
-        </View>
+        <EmptyState
+          title="No transactions yet"
+          description="Your wallet activity will appear here once transfers happen."
+        />
       ) : (
         <FlatList
           data={transactions}
@@ -124,22 +123,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 24,
-  },
-  emptyState: {
-    backgroundColor: "#111827",
-    borderRadius: 16,
-    padding: 20,
-  },
-  emptyTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    color: "#94A3B8",
-    fontSize: 14,
-    lineHeight: 20,
   },
   card: {
     backgroundColor: "#111827",

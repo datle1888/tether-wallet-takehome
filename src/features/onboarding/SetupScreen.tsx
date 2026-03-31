@@ -13,6 +13,8 @@ import { useAppStore } from "../../store/useAppStore";
 import { appStorage } from "../../services/storage/appStorage";
 import { biometricService } from "../../services/biometrics/biometricService";
 import { balanceService } from "../../services/wdk/balanceService";
+import { LoadingCard } from "../../components/LoadingCard";
+import { EmptyState } from "../../components/EmptyState";
 import type { WalletSummary } from "../../types/wallet";
 import type { BalanceItem } from "../../types/balance";
 
@@ -163,13 +165,16 @@ export function SetupScreen({ navigation }: Props) {
       </View>
 
       <Text style={styles.sectionTitle}>Balances</Text>
-      <View style={styles.balanceCard}>
-        {loadingBalances ? (
-          <Text style={styles.balanceHelper}>Loading balances...</Text>
-        ) : balances.length === 0 ? (
-          <Text style={styles.balanceHelper}>No balances available.</Text>
-        ) : (
-          balances.map((item) => (
+      {loadingBalances ? (
+        <LoadingCard text="Loading balances..." />
+      ) : balances.length === 0 ? (
+        <EmptyState
+          title="No balances available"
+          description="Balances will appear here after wallet data is loaded."
+        />
+      ) : (
+        <View style={styles.balanceCard}>
+          {balances.map((item) => (
             <View key={item.symbol} style={styles.balanceRow}>
               <View>
                 <Text style={styles.balanceSymbol}>{item.symbol}</Text>
@@ -177,9 +182,9 @@ export function SetupScreen({ navigation }: Props) {
               </View>
               <Text style={styles.balanceAmount}>{item.amountFormatted}</Text>
             </View>
-          ))
-        )}
-      </View>
+          ))}
+        </View>
+      )}
 
       <Text style={styles.sectionTitle}>Quick actions</Text>
       <View style={styles.actionRow}>
@@ -310,16 +315,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 12,
+    marginTop: 24,
   },
   balanceCard: {
     backgroundColor: "#111827",
     borderRadius: 20,
     padding: 16,
-    marginBottom: 24,
-  },
-  balanceHelper: {
-    color: "#94A3B8",
-    fontSize: 14,
   },
   balanceRow: {
     flexDirection: "row",
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 15,
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 8,
   },
   outlineButtonText: {
     color: "#E2E8F0",
