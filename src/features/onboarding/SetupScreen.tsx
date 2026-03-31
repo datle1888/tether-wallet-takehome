@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -56,6 +56,17 @@ export function SetupScreen({ navigation }: Props) {
   const resetAppState = useAppStore((state) => state.resetAppState);
 
   const activeWallet = wallets.find((wallet) => wallet.id === activeWalletId);
+
+  const totalBalanceText = useMemo(() => {
+    if (!balances.length) return "--";
+
+    const total = balances.reduce((sum, item) => {
+      const value = Number(item.amountFormatted);
+      return Number.isNaN(value) ? sum : sum + value;
+    }, 0);
+
+    return total.toFixed(2);
+  }, [balances]);
 
   const loadBalances = useCallback(async () => {
     try {
@@ -139,32 +150,54 @@ export function SetupScreen({ navigation }: Props) {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Wallet Home</Text>
-      <Text style={styles.subtitle}>
-        A simple wallet flow with local state and security controls.
-      </Text>
-
-      <View style={styles.walletCard}>
-        <View style={styles.walletHeaderRow}>
-          <Text style={styles.walletName}>{activeWallet?.name ?? "-"}</Text>
-          <Text style={styles.chainBadge}>{activeWallet?.chain ?? "-"}</Text>
+      <View style={styles.headerRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Wallet</Text>
+          <Text style={styles.subtitle}>Simple, secure, and easy to scan.</Text>
         </View>
 
-        <Text style={styles.cardLabel}>Address</Text>
-        <Text style={styles.address}>{maskAddress(activeWallet?.address)}</Text>
-
-        <Text style={styles.cardHint}>
-          Full wallet details are available in Receive.
-        </Text>
-      </View>
-
-      <View style={styles.sectionHeaderRow}>
-        <Text style={styles.sectionTitle}>Balances</Text>
-        <Pressable onPress={loadBalances}>
-          <Text style={styles.refreshText}>Refresh</Text>
+        <Pressable
+          style={styles.walletSwitcherPill}
+          onPress={() => navigation.navigate("WalletSwitcher")}
+        >
+          <Text style={styles.walletSwitcherText}>Wallets</Text>
         </Pressable>
       </View>
 
+      <View style={styles.heroCard}>
+        <Text style={styles.heroLabel}>Active wallet</Text>
+        <Text style={styles.heroWalletName}>{activeWallet?.name ?? "-"}</Text>
+        <Text style={styles.heroAddress}>
+          {maskAddress(activeWallet?.address)}
+        </Text>
+
+        <View style={styles.totalBalanceBlock}>
+          <Text style={styles.totalBalanceLabel}>Estimated total</Text>
+          <Text style={styles.totalBalanceValue}>
+            {loadingBalances ? "Loading..." : totalBalanceText}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.primaryActionsRow}>
+        <Pressable
+          style={styles.primaryAction}
+          onPress={() => navigation.navigate("Receive")}
+        >
+          <Text style={styles.primaryActionTitle}>Receive</Text>
+          <Text style={styles.primaryActionHint}>Show address and QR</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.primaryAction}
+          onPress={() => navigation.navigate("Send")}
+        >
+          <Text style={styles.primaryActionTitle}>Send</Text>
+          <Text style={styles.primaryActionHint}>Transfer assets out</Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.sectionTitle}>Balances</Text>
       {loadingBalances ? (
         <LoadingCard text="Loading balances..." />
       ) : balancesError ? (
@@ -189,63 +222,54 @@ export function SetupScreen({ navigation }: Props) {
               <Text style={styles.balanceAmount}>{item.amountFormatted}</Text>
             </View>
           ))}
+
+          <Pressable style={styles.inlineRefreshButton} onPress={loadBalances}>
+            <Text style={styles.inlineRefreshText}>Refresh balances</Text>
+          </Pressable>
         </View>
       )}
 
-      <Text style={styles.sectionTitle}>Quick actions</Text>
-      <View style={styles.actionRow}>
+      <Text style={styles.sectionTitle}>More</Text>
+      <View style={styles.secondaryList}>
         <Pressable
-          style={styles.primaryAction}
-          onPress={() => navigation.navigate("Receive")}
-        >
-          <Text style={styles.primaryActionText}>Receive</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.primaryAction}
-          onPress={() => navigation.navigate("Send")}
-        >
-          <Text style={styles.primaryActionText}>Send</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.actionRow}>
-        <Pressable
-          style={styles.secondaryAction}
+          style={styles.secondaryListItem}
           onPress={() => navigation.navigate("Activity")}
         >
-          <Text style={styles.secondaryActionText}>Activity</Text>
+          <Text style={styles.secondaryListTitle}>Activity</Text>
+          <Text style={styles.secondaryListHint}>
+            View incoming and outgoing transactions
+          </Text>
         </Pressable>
 
-        <Pressable
-          style={styles.secondaryAction}
-          onPress={() => navigation.navigate("WalletSwitcher")}
-        >
-          <Text style={styles.secondaryActionText}>Wallets</Text>
+        <View style={styles.settingCard}>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <Text style={styles.secondaryListTitle}>Biometric lock</Text>
+            <Text style={styles.secondaryListHint}>
+              Protect wallet access on this device
+            </Text>
+          </View>
+          <Switch
+            value={biometricEnabled}
+            onValueChange={handleToggleBiometric}
+          />
+        </View>
+
+        <Pressable style={styles.secondaryListItem} onPress={handleLockNow}>
+          <Text style={styles.secondaryListTitle}>Lock now</Text>
+          <Text style={styles.secondaryListHint}>
+            Require biometric unlock immediately
+          </Text>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>Security</Text>
-      <View style={styles.settingCard}>
-        <Text style={styles.settingText}>Enable biometric lock</Text>
-        <Switch
-          value={biometricEnabled}
-          onValueChange={handleToggleBiometric}
-        />
-      </View>
+      <Text style={styles.testingTitle}>Testing tools</Text>
 
-      <Pressable style={styles.outlineButton} onPress={handleLockNow}>
-        <Text style={styles.outlineButtonText}>Lock now</Text>
+      <Pressable style={styles.testingButton} onPress={handleAddSecondWallet}>
+        <Text style={styles.testingButtonText}>Add another demo wallet</Text>
       </Pressable>
 
-      <Text style={styles.sectionTitle}>Testing tools</Text>
-
-      <Pressable style={styles.mutedButton} onPress={handleAddSecondWallet}>
-        <Text style={styles.mutedButtonText}>Add another demo wallet</Text>
-      </Pressable>
-
-      <Pressable style={styles.dangerButton} onPress={handleResetApp}>
-        <Text style={styles.dangerButtonText}>Reset app data</Text>
+      <Pressable style={styles.resetButton} onPress={handleResetApp}>
+        <Text style={styles.resetButtonText}>Reset app data</Text>
       </Pressable>
     </ScrollView>
   );
@@ -260,85 +284,104 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 32,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 20,
+  },
   title: {
     fontSize: 30,
     fontWeight: "700",
     color: "#FFFFFF",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 15,
     color: "#A0AEC0",
     lineHeight: 22,
-    marginBottom: 20,
   },
-  walletCard: {
-    backgroundColor: "#111827",
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 24,
-  },
-  walletHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  walletName: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "700",
-    flex: 1,
-    marginRight: 12,
-  },
-  chainBadge: {
-    color: "#93C5FD",
-    fontSize: 13,
-    fontWeight: "600",
-    backgroundColor: "#172554",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  walletSwitcherPill: {
+    backgroundColor: "#1E293B",
     borderRadius: 999,
-    textTransform: "uppercase",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginLeft: 12,
   },
-  cardLabel: {
+  walletSwitcherText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  heroCard: {
+    backgroundColor: "#111827",
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+  },
+  heroLabel: {
     color: "#94A3B8",
     fontSize: 13,
-    marginTop: 16,
     marginBottom: 6,
   },
-  address: {
+  heroWalletName: {
     color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 24,
+    fontWeight: "700",
   },
-  cardHint: {
-    color: "#64748B",
+  heroAddress: {
+    color: "#CBD5E1",
+    fontSize: 15,
+    marginTop: 6,
+  },
+  totalBalanceBlock: {
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#1E293B",
+  },
+  totalBalanceLabel: {
+    color: "#94A3B8",
     fontSize: 13,
-    marginTop: 12,
+    marginBottom: 6,
   },
-  sectionHeaderRow: {
+  totalBalanceValue: {
+    color: "#FFFFFF",
+    fontSize: 28,
+    fontWeight: "700",
+  },
+  primaryActionsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 24,
-    marginBottom: 12,
+    gap: 12,
+    marginBottom: 24,
+  },
+  primaryAction: {
+    flex: 1,
+    backgroundColor: "#2563EB",
+    borderRadius: 18,
+    padding: 18,
+  },
+  primaryActionTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  primaryActionHint: {
+    color: "#DBEAFE",
+    fontSize: 13,
+    lineHeight: 18,
   },
   sectionTitle: {
     color: "#E2E8F0",
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 12,
-    marginTop: 24,
-  },
-  refreshText: {
-    color: "#60A5FA",
-    fontSize: 14,
-    fontWeight: "600",
   },
   balanceCard: {
     backgroundColor: "#111827",
     borderRadius: 20,
     padding: 16,
+    marginBottom: 24,
   },
   balanceRow: {
     flexDirection: "row",
@@ -361,34 +404,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  actionRow: {
-    flexDirection: "row",
-    gap: 12,
+  inlineRefreshButton: {
+    marginTop: 8,
+    backgroundColor: "#1E293B",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  inlineRefreshText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  secondaryList: {
+    marginBottom: 24,
+  },
+  secondaryListItem: {
+    backgroundColor: "#111827",
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 12,
   },
-  primaryAction: {
-    flex: 1,
-    backgroundColor: "#2563EB",
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  primaryActionText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  secondaryAction: {
-    flex: 1,
-    backgroundColor: "#1E293B",
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  secondaryActionText: {
+  secondaryListTitle: {
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "600",
+    marginBottom: 4,
+  },
+  secondaryListHint: {
+    color: "#94A3B8",
+    fontSize: 13,
+    lineHeight: 18,
   },
   settingCard: {
     backgroundColor: "#111827",
@@ -396,48 +442,35 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
   },
-  settingText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "500",
-    flex: 1,
-    marginRight: 12,
+  testingTitle: {
+    color: "#64748B",
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
   },
-  outlineButton: {
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 16,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  outlineButtonText: {
-    color: "#E2E8F0",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  mutedButton: {
+  testingButton: {
     backgroundColor: "#1E293B",
     borderRadius: 16,
     paddingVertical: 15,
     alignItems: "center",
     marginBottom: 12,
   },
-  mutedButtonText: {
+  testingButtonText: {
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "600",
   },
-  dangerButton: {
+  resetButton: {
     backgroundColor: "#B91C1C",
     borderRadius: 16,
     paddingVertical: 15,
     alignItems: "center",
   },
-  dangerButtonText: {
+  resetButtonText: {
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700",
