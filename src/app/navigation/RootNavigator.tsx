@@ -10,6 +10,7 @@ import { WalletSwitcherScreen } from "../../features/wallets/WalletSwitcherScree
 import { ReceiveScreen } from "../../features/receive/ReceiveScreen";
 import { SendScreen } from "../../features/send/SendScreen";
 import { SendReviewScreen } from "../../features/send/SendReviewScreen";
+import { ActivityScreen } from "../../features/transactions/ActivityScreen";
 import { useBootstrap } from "../bootstrap/useBootstrap";
 import { useAppStore } from "../../store/useAppStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -31,6 +32,7 @@ export type RootStackParamList = {
     amount: string;
     estimatedFee: string;
   };
+  Activity: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -109,6 +111,11 @@ export function RootNavigator() {
             name="SendReview"
             component={SendReviewScreen}
             options={{ title: "Review Transfer" }}
+          />
+          <Stack.Screen
+            name="Activity"
+            component={ActivityScreen}
+            options={{ title: "Activity" }}
           />
         </>
       )}

@@ -86,6 +86,13 @@ export function SetupScreen({ navigation }: Props) {
 
       <Pressable
         style={styles.button}
+        onPress={() => navigation.navigate("Activity")}
+      >
+        <Text style={styles.buttonText}>Activity</Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.button}
         onPress={() => navigation.navigate("WalletSwitcher")}
       >
         <Text style={styles.buttonText}>Switch wallet</Text>
