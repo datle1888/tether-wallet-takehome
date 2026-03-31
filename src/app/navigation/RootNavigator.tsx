@@ -7,6 +7,7 @@ import { ImportWalletScreen } from "../../features/onboarding/ImportWalletScreen
 import { SetupScreen } from "../../features/onboarding/SetupScreen";
 import { SplashScreen } from "../../features/home/SplashScreen";
 import { WalletSwitcherScreen } from "../../features/wallets/WalletSwitcherScreen";
+import { ReceiveScreen } from "../../features/receive/ReceiveScreen";
 import { useBootstrap } from "../bootstrap/useBootstrap";
 import { useAppStore } from "../../store/useAppStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   ImportWallet: undefined;
   Setup: undefined;
   WalletSwitcher: undefined;
+  Receive: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -84,6 +86,11 @@ export function RootNavigator() {
             name="WalletSwitcher"
             component={WalletSwitcherScreen}
             options={{ title: "Switch Wallet" }}
+          />
+          <Stack.Screen
+            name="Receive"
+            component={ReceiveScreen}
+            options={{ title: "Receive" }}
           />
         </>
       )}
