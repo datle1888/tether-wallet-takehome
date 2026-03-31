@@ -1,8 +1,9 @@
 import React from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAppStore } from "../../store/useAppStore";
 import { appStorage } from "../../services/storage/appStorage";
+import { biometricService } from "../../services/biometrics/biometricService";
 import type { WalletSummary } from "../../types/wallet";
 
 type Props = {
@@ -27,6 +28,9 @@ export function SetupScreen({ navigation }: Props) {
   const addWallet = useWalletStore((state) => state.addWallet);
   const resetWalletState = useWalletStore((state) => state.resetWalletState);
 
+  const biometricEnabled = useAppStore((state) => state.biometricEnabled);
+  const setBiometricEnabled = useAppStore((state) => state.setBiometricEnabled);
+  const setUnlocked = useAppStore((state) => state.setUnlocked);
   const resetAppState = useAppStore((state) => state.resetAppState);
 
   const activeWallet = wallets.find((wallet) => wallet.id === activeWalletId);
@@ -54,6 +58,36 @@ export function SetupScreen({ navigation }: Props) {
     ]);
   };
 
+  const handleToggleBiometric = async (value: boolean) => {
+    if (value) {
+      const available = await biometricService.isAvailable();
+
+      if (!available) {
+        Alert.alert(
+          "Unavailable",
+          "Biometric authentication is not available on this device."
+        );
+        return;
+      }
+    }
+
+    await appStorage.setBiometricEnabled(value);
+    setBiometricEnabled(value);
+
+    if (!value) {
+      setUnlocked(true);
+    }
+  };
+
+  const handleLockNow = () => {
+    if (!biometricEnabled) {
+      Alert.alert("Biometric lock is off", "Enable biometric lock first.");
+      return;
+    }
+
+    setUnlocked(false);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home placeholder</Text>
@@ -69,6 +103,18 @@ export function SetupScreen({ navigation }: Props) {
         <Text style={styles.label}>Chain</Text>
         <Text style={styles.value}>{activeWallet?.chain ?? "-"}</Text>
       </View>
+
+      <View style={styles.settingRow}>
+        <Text style={styles.settingText}>Enable biometric lock</Text>
+        <Switch
+          value={biometricEnabled}
+          onValueChange={handleToggleBiometric}
+        />
+      </View>
+
+      <Pressable style={styles.button} onPress={handleLockNow}>
+        <Text style={styles.buttonText}>Lock now</Text>
+      </Pressable>
 
       <Pressable
         style={styles.button}
@@ -149,6 +195,20 @@ const styles = StyleSheet.create({
   value: {
     color: "#FFFFFF",
     fontSize: 15,
+  },
+  settingRow: {
+    backgroundColor: "#111827",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  settingText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "500",
   },
   button: {
     backgroundColor: "#2563EB",

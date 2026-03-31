@@ -11,6 +11,7 @@ import { ReceiveScreen } from "../../features/receive/ReceiveScreen";
 import { SendScreen } from "../../features/send/SendScreen";
 import { SendReviewScreen } from "../../features/send/SendReviewScreen";
 import { ActivityScreen } from "../../features/transactions/ActivityScreen";
+import { UnlockScreen } from "../../features/lock/UnlockScreen";
 import { useBootstrap } from "../bootstrap/useBootstrap";
 import { useAppStore } from "../../store/useAppStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -33,6 +34,7 @@ export type RootStackParamList = {
     estimatedFee: string;
   };
   Activity: undefined;
+  Unlock: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -42,6 +44,8 @@ export function RootNavigator() {
 
   const isBootstrapped = useAppStore((state) => state.isBootstrapped);
   const hasSeenOnboarding = useAppStore((state) => state.hasSeenOnboarding);
+  const biometricEnabled = useAppStore((state) => state.biometricEnabled);
+  const isUnlocked = useAppStore((state) => state.isUnlocked);
   const wallets = useWalletStore((state) => state.wallets);
 
   if (!isBootstrapped) {
@@ -49,6 +53,8 @@ export function RootNavigator() {
   }
 
   const shouldShowOnboarding = !hasSeenOnboarding || wallets.length === 0;
+  const shouldShowUnlock =
+    biometricEnabled && !isUnlocked && wallets.length > 0;
 
   return (
     <Stack.Navigator
@@ -85,6 +91,12 @@ export function RootNavigator() {
             options={{ title: "Import Wallet" }}
           />
         </>
+      ) : shouldShowUnlock ? (
+        <Stack.Screen
+          name="Unlock"
+          component={UnlockScreen}
+          options={{ headerShown: false }}
+        />
       ) : (
         <>
           <Stack.Screen

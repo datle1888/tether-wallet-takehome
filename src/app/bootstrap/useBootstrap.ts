@@ -8,6 +8,8 @@ export function useBootstrap() {
   const setHasSeenOnboarding = useAppStore(
     (state) => state.setHasSeenOnboarding
   );
+  const setBiometricEnabled = useAppStore((state) => state.setBiometricEnabled);
+  const setUnlocked = useAppStore((state) => state.setUnlocked);
 
   const setWallets = useWalletStore((state) => state.setWallets);
   const setActiveWalletId = useWalletStore((state) => state.setActiveWalletId);
@@ -15,14 +17,18 @@ export function useBootstrap() {
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        const [hasSeenOnboarding, wallets, activeWalletId] = await Promise.all([
-          appStorage.getHasSeenOnboarding(),
-          appStorage.getWallets(),
-          appStorage.getActiveWalletId(),
-        ]);
+        const [hasSeenOnboarding, wallets, activeWalletId, biometricEnabled] =
+          await Promise.all([
+            appStorage.getHasSeenOnboarding(),
+            appStorage.getWallets(),
+            appStorage.getActiveWalletId(),
+            appStorage.getBiometricEnabled(),
+          ]);
 
         setHasSeenOnboarding(hasSeenOnboarding);
         setWallets(wallets);
+        setBiometricEnabled(biometricEnabled);
+        setUnlocked(!biometricEnabled);
 
         if (activeWalletId) {
           setActiveWalletId(activeWalletId);
@@ -35,5 +41,12 @@ export function useBootstrap() {
     };
 
     bootstrap();
-  }, [setBootstrapped, setHasSeenOnboarding, setWallets, setActiveWalletId]);
+  }, [
+    setBootstrapped,
+    setHasSeenOnboarding,
+    setWallets,
+    setActiveWalletId,
+    setBiometricEnabled,
+    setUnlocked,
+  ]);
 }

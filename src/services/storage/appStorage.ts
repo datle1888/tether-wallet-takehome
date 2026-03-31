@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
   HAS_SEEN_ONBOARDING: "has_seen_onboarding",
   WALLETS: "wallets",
   ACTIVE_WALLET_ID: "active_wallet_id",
+  BIOMETRIC_ENABLED: "biometric_enabled",
 };
 
 export const appStorage = {
@@ -47,11 +48,29 @@ export const appStorage = {
     return AsyncStorage.getItem(STORAGE_KEYS.ACTIVE_WALLET_ID);
   },
 
+  async setBiometricEnabled(value: boolean) {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.BIOMETRIC_ENABLED,
+      JSON.stringify(value)
+    );
+  },
+
+  async getBiometricEnabled(): Promise<boolean> {
+    const value = await AsyncStorage.getItem(STORAGE_KEYS.BIOMETRIC_ENABLED);
+
+    if (value === null) {
+      return false;
+    }
+
+    return JSON.parse(value);
+  },
+
   async clearAppData() {
     await AsyncStorage.multiRemove([
       STORAGE_KEYS.HAS_SEEN_ONBOARDING,
       STORAGE_KEYS.WALLETS,
       STORAGE_KEYS.ACTIVE_WALLET_ID,
+      STORAGE_KEYS.BIOMETRIC_ENABLED,
     ]);
   },
 };
