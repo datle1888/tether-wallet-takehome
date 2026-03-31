@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { WelcomeScreen } from "../../features/onboarding/WelcomeScreen";
 import { SetupScreen } from "../../features/onboarding/SetupScreen";
 import { SplashScreen } from "../../features/home/SplashScreen";
+import { WalletSwitcherScreen } from "../../features/wallets/WalletSwitcherScreen";
 import { useBootstrap } from "../bootstrap/useBootstrap";
 import { useAppStore } from "../../store/useAppStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -10,6 +11,7 @@ import { useWalletStore } from "../../store/useWalletStore";
 export type RootStackParamList = {
   Welcome: undefined;
   Setup: undefined;
+  WalletSwitcher: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,11 +48,18 @@ export function RootNavigator() {
           options={{ title: "Wallet Setup" }}
         />
       ) : (
-        <Stack.Screen
-          name="Setup"
-          component={SetupScreen}
-          options={{ title: "Home" }}
-        />
+        <>
+          <Stack.Screen
+            name="Setup"
+            component={SetupScreen}
+            options={{ title: "Home" }}
+          />
+          <Stack.Screen
+            name="WalletSwitcher"
+            component={WalletSwitcherScreen}
+            options={{ title: "Switch Wallet" }}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

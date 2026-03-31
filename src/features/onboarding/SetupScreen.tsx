@@ -1,12 +1,39 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useWalletStore } from "../../store/useWalletStore";
+import { appStorage } from "../../services/storage/appStorage";
+import type { WalletSummary } from "../../types/wallet";
 
-export function SetupScreen() {
+type Props = {
+  navigation: any;
+};
+
+function generateSecondFakeWallet(): WalletSummary {
+  const timestamp = Date.now();
+
+  return {
+    id: `wallet-${timestamp}`,
+    name: `Wallet ${timestamp.toString().slice(-4)}`,
+    address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    chain: "evm",
+    createdAt: timestamp,
+  };
+}
+
+export function SetupScreen({ navigation }: Props) {
   const wallets = useWalletStore((state) => state.wallets);
   const activeWalletId = useWalletStore((state) => state.activeWalletId);
+  const addWallet = useWalletStore((state) => state.addWallet);
 
   const activeWallet = wallets.find((wallet) => wallet.id === activeWalletId);
+
+  const handleAddSecondWallet = async () => {
+    const newWallet = generateSecondFakeWallet();
+    const nextWallets = [...wallets, newWallet];
+
+    await appStorage.setWallets(nextWallets);
+    addWallet(newWallet);
+  };
 
   return (
     <View style={styles.container}>
@@ -23,6 +50,20 @@ export function SetupScreen() {
         <Text style={styles.label}>Chain</Text>
         <Text style={styles.value}>{activeWallet?.chain ?? "-"}</Text>
       </View>
+
+      <Pressable
+        style={styles.button}
+        onPress={() => navigation.navigate("WalletSwitcher")}
+      >
+        <Text style={styles.buttonText}>Switch wallet</Text>
+      </Pressable>
+
+      <Pressable
+        style={[styles.button, styles.secondaryButton]}
+        onPress={handleAddSecondWallet}
+      >
+        <Text style={styles.buttonText}>Add another demo wallet</Text>
+      </Pressable>
     </View>
   );
 }
@@ -50,6 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
     borderRadius: 16,
     padding: 16,
+    marginBottom: 20,
   },
   label: {
     color: "#94A3B8",
@@ -60,5 +102,21 @@ const styles = StyleSheet.create({
   value: {
     color: "#FFFFFF",
     fontSize: 15,
+  },
+  button: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  secondaryButton: {
+    backgroundColor: "#1D4ED8",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
