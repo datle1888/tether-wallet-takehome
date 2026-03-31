@@ -52,6 +52,19 @@ The mock provider simulates WDK behavior and can be replaced by real SDK impleme
 
 ---
 
+# AI Usage Note
+
+I used AI as a development assistant for:
+
+- planning implementation order
+- refining project structure
+- generating boilerplate for screens, state, and services
+- drafting README and submission materials
+
+I reviewed, adapted, and tested the generated code manually during implementation.
+
+Final decisions on architecture, feature scope, naming, and UX organization were curated and adjusted during development to keep the solution aligned with the assignment requirements.
+
 ## Run the project
 npm install
 npx expo start --ios or --android
