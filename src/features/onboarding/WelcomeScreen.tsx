@@ -1,69 +1,30 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { useAppStore } from "../../store/useAppStore";
-import { useWalletStore } from "../../store/useWalletStore";
-import { appStorage } from "../../services/storage/appStorage";
-import type { WalletSummary } from "../../types/wallet";
 
-function generateFakeWallet(): WalletSummary {
-  const timestamp = Date.now();
+type Props = {
+  navigation: any;
+};
 
-  return {
-    id: `wallet-${timestamp}`,
-    name: "Main Wallet",
-    address: "0x8ba1f109551bD432803012645Ac136ddd64DBA72",
-    chain: "evm",
-    createdAt: timestamp,
-  };
-}
-
-export function WelcomeScreen() {
-  const [loading, setLoading] = useState(false);
-
-  const setHasSeenOnboarding = useAppStore(
-    (state) => state.setHasSeenOnboarding
-  );
-  const wallets = useWalletStore((state) => state.wallets);
-  const addWallet = useWalletStore((state) => state.addWallet);
-  const setActiveWalletId = useWalletStore((state) => state.setActiveWalletId);
-
-  const handleCreateDemoWallet = async () => {
-    try {
-      setLoading(true);
-
-      const newWallet = generateFakeWallet();
-      const nextWallets = [...wallets, newWallet];
-
-      await appStorage.setHasSeenOnboarding(true);
-      await appStorage.setWallets(nextWallets);
-      await appStorage.setActiveWalletId(newWallet.id);
-
-      addWallet(newWallet);
-      setActiveWalletId(newWallet.id);
-      setHasSeenOnboarding(true);
-    } catch (error) {
-      console.log("Failed to create demo wallet", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export function WelcomeScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tether Wallet Take Home</Text>
       <Text style={styles.subtitle}>
-        For this step, we create a fake wallet locally to prove the app flow
-        works.
+        Start by creating a new wallet or importing an existing one.
       </Text>
 
       <Pressable
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleCreateDemoWallet}
-        disabled={loading}
+        style={styles.button}
+        onPress={() => navigation.navigate("CreateWallet")}
       >
-        <Text style={styles.buttonText}>
-          {loading ? "Creating..." : "Create demo wallet"}
-        </Text>
+        <Text style={styles.buttonText}>Create wallet</Text>
+      </Pressable>
+
+      <Pressable
+        style={[styles.button, styles.secondaryButton]}
+        onPress={() => navigation.navigate("ImportWallet")}
+      >
+        <Text style={styles.buttonText}>Import wallet</Text>
       </Pressable>
     </View>
   );
@@ -94,9 +55,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: "center",
+    marginBottom: 12,
   },
-  buttonDisabled: {
-    opacity: 0.7,
+  secondaryButton: {
+    backgroundColor: "#1D4ED8",
   },
   buttonText: {
     color: "#FFFFFF",

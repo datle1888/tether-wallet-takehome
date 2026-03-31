@@ -1,6 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { WelcomeScreen } from "../../features/onboarding/WelcomeScreen";
+import { CreateWalletScreen } from "../../features/onboarding/CreateWalletScreen";
+import { ImportWalletScreen } from "../../features/onboarding/ImportWalletScreen";
 import { SetupScreen } from "../../features/onboarding/SetupScreen";
 import { SplashScreen } from "../../features/home/SplashScreen";
 import { WalletSwitcherScreen } from "../../features/wallets/WalletSwitcherScreen";
@@ -10,6 +12,8 @@ import { useWalletStore } from "../../store/useWalletStore";
 
 export type RootStackParamList = {
   Welcome: undefined;
+  CreateWallet: undefined;
+  ImportWallet: undefined;
   Setup: undefined;
   WalletSwitcher: undefined;
 };
@@ -42,11 +46,23 @@ export function RootNavigator() {
       }}
     >
       {shouldShowOnboarding ? (
-        <Stack.Screen
-          name="Welcome"
-          component={WelcomeScreen}
-          options={{ title: "Wallet Setup" }}
-        />
+        <>
+          <Stack.Screen
+            name="Welcome"
+            component={WelcomeScreen}
+            options={{ title: "Wallet Setup" }}
+          />
+          <Stack.Screen
+            name="CreateWallet"
+            component={CreateWalletScreen}
+            options={{ title: "Create Wallet" }}
+          />
+          <Stack.Screen
+            name="ImportWallet"
+            component={ImportWalletScreen}
+            options={{ title: "Import Wallet" }}
+          />
+        </>
       ) : (
         <>
           <Stack.Screen
