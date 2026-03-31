@@ -1,21 +1,48 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { useAppStore } from "../../store/useAppStore";
+import { useWalletStore } from "../../store/useWalletStore";
 import { appStorage } from "../../services/storage/appStorage";
+import type { WalletSummary } from "../../types/wallet";
+
+function generateFakeWallet(): WalletSummary {
+  const timestamp = Date.now();
+
+  return {
+    id: `wallet-${timestamp}`,
+    name: "Main Wallet",
+    address: "0x8ba1f109551bD432803012645Ac136ddd64DBA72",
+    chain: "evm",
+    createdAt: timestamp,
+  };
+}
 
 export function WelcomeScreen() {
   const [loading, setLoading] = useState(false);
+
   const setHasSeenOnboarding = useAppStore(
     (state) => state.setHasSeenOnboarding
   );
+  const wallets = useWalletStore((state) => state.wallets);
+  const addWallet = useWalletStore((state) => state.addWallet);
+  const setActiveWalletId = useWalletStore((state) => state.setActiveWalletId);
 
-  const handleFinishOnboarding = async () => {
+  const handleCreateDemoWallet = async () => {
     try {
       setLoading(true);
+
+      const newWallet = generateFakeWallet();
+      const nextWallets = [...wallets, newWallet];
+
       await appStorage.setHasSeenOnboarding(true);
+      await appStorage.setWallets(nextWallets);
+      await appStorage.setActiveWalletId(newWallet.id);
+
+      addWallet(newWallet);
+      setActiveWalletId(newWallet.id);
       setHasSeenOnboarding(true);
     } catch (error) {
-      console.log("Failed to save onboarding state", error);
+      console.log("Failed to create demo wallet", error);
     } finally {
       setLoading(false);
     }
@@ -25,16 +52,17 @@ export function WelcomeScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Tether Wallet Take Home</Text>
       <Text style={styles.subtitle}>
-        This onboarding state will now persist even after app reload.
+        For this step, we create a fake wallet locally to prove the app flow
+        works.
       </Text>
 
       <Pressable
         style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleFinishOnboarding}
+        onPress={handleCreateDemoWallet}
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Saving..." : "Finish onboarding"}
+          {loading ? "Creating..." : "Create demo wallet"}
         </Text>
       </Pressable>
     </View>

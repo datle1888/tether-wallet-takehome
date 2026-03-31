@@ -5,6 +5,7 @@ import { SetupScreen } from "../../features/onboarding/SetupScreen";
 import { SplashScreen } from "../../features/home/SplashScreen";
 import { useBootstrap } from "../bootstrap/useBootstrap";
 import { useAppStore } from "../../store/useAppStore";
+import { useWalletStore } from "../../store/useWalletStore";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -18,10 +19,13 @@ export function RootNavigator() {
 
   const isBootstrapped = useAppStore((state) => state.isBootstrapped);
   const hasSeenOnboarding = useAppStore((state) => state.hasSeenOnboarding);
+  const wallets = useWalletStore((state) => state.wallets);
 
   if (!isBootstrapped) {
     return <SplashScreen />;
   }
+
+  const shouldShowOnboarding = !hasSeenOnboarding || wallets.length === 0;
 
   return (
     <Stack.Navigator
@@ -35,7 +39,7 @@ export function RootNavigator() {
         },
       }}
     >
-      {!hasSeenOnboarding ? (
+      {shouldShowOnboarding ? (
         <Stack.Screen
           name="Welcome"
           component={WelcomeScreen}
