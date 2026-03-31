@@ -8,6 +8,10 @@ import {
   View,
 } from "react-native";
 
+type Props = {
+  navigation: any;
+};
+
 function isValidEvmAddress(value: string) {
   return /^0x[a-fA-F0-9]{40}$/.test(value.trim());
 }
@@ -17,7 +21,16 @@ function isValidAmount(value: string) {
   return value.trim().length > 0 && !Number.isNaN(amount) && amount > 0;
 }
 
-export function SendScreen() {
+function getFakeEstimatedFee(amount: string) {
+  const parsed = Number(amount);
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    return "0.00 USDT";
+  }
+
+  return `${(parsed * 0.01).toFixed(2)} USDT`;
+}
+
+export function SendScreen({ navigation }: Props) {
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -42,7 +55,11 @@ export function SendScreen() {
       return;
     }
 
-    Alert.alert("Step 13 success", "Send form validation passed.");
+    navigation.navigate("SendReview", {
+      recipient: recipient.trim(),
+      amount: amount.trim(),
+      estimatedFee: getFakeEstimatedFee(amount),
+    });
   };
 
   return (
