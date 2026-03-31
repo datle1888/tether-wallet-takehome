@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { WelcomeScreen } from "../../features/onboarding/WelcomeScreen";
 import { CreateWalletScreen } from "../../features/onboarding/CreateWalletScreen";
+import { BackupSeedScreen } from "../../features/onboarding/BackupSeedScreen";
 import { ImportWalletScreen } from "../../features/onboarding/ImportWalletScreen";
 import { SetupScreen } from "../../features/onboarding/SetupScreen";
 import { SplashScreen } from "../../features/home/SplashScreen";
@@ -13,6 +14,10 @@ import { useWalletStore } from "../../store/useWalletStore";
 export type RootStackParamList = {
   Welcome: undefined;
   CreateWallet: undefined;
+  BackupSeed: {
+    walletName: string;
+    seedPhrase: string;
+  };
   ImportWallet: undefined;
   Setup: undefined;
   WalletSwitcher: undefined;
@@ -56,6 +61,11 @@ export function RootNavigator() {
             name="CreateWallet"
             component={CreateWalletScreen}
             options={{ title: "Create Wallet" }}
+          />
+          <Stack.Screen
+            name="BackupSeed"
+            component={BackupSeedScreen}
+            options={{ title: "Backup Seed Phrase" }}
           />
           <Stack.Screen
             name="ImportWallet"

@@ -1,49 +1,29 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { useAppStore } from "../../store/useAppStore";
-import { useWalletStore } from "../../store/useWalletStore";
-import { appStorage } from "../../services/storage/appStorage";
-import type { WalletSummary } from "../../types/wallet";
 
-function generateFakeCreatedWallet(name: string): WalletSummary {
-  const timestamp = Date.now();
+type Props = {
+  navigation: any;
+};
 
-  return {
-    id: `wallet-${timestamp}`,
-    name: name.trim() || "Main Wallet",
-    address: "0x8ba1f109551bD432803012645Ac136ddd64DBA72",
-    chain: "evm",
-    createdAt: timestamp,
-  };
+function generateFakeSeedPhrase() {
+  return "twelve seed phrase demo wallet words for backup testing only";
 }
 
-export function CreateWalletScreen() {
+export function CreateWalletScreen({ navigation }: Props) {
   const [walletName, setWalletName] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const wallets = useWalletStore((state) => state.wallets);
-  const addWallet = useWalletStore((state) => state.addWallet);
-  const setActiveWalletId = useWalletStore((state) => state.setActiveWalletId);
-  const setHasSeenOnboarding = useAppStore(
-    (state) => state.setHasSeenOnboarding
-  );
 
   const handleCreateWallet = async () => {
     try {
       setLoading(true);
 
-      const newWallet = generateFakeCreatedWallet(walletName);
-      const nextWallets = [...wallets, newWallet];
+      const finalWalletName = walletName.trim() || "Main Wallet";
+      const seedPhrase = generateFakeSeedPhrase();
 
-      await appStorage.setWallets(nextWallets);
-      await appStorage.setActiveWalletId(newWallet.id);
-      await appStorage.setHasSeenOnboarding(true);
-
-      addWallet(newWallet);
-      setActiveWalletId(newWallet.id);
-      setHasSeenOnboarding(true);
-    } catch (error) {
-      console.log("Failed to create wallet", error);
+      navigation.navigate("BackupSeed", {
+        walletName: finalWalletName,
+        seedPhrase,
+      });
     } finally {
       setLoading(false);
     }
@@ -53,7 +33,7 @@ export function CreateWalletScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Create wallet</Text>
       <Text style={styles.subtitle}>
-        For now this uses local demo wallet data. Real WDK creation comes next.
+        Next we show a backup screen before the wallet is added to the app.
       </Text>
 
       <TextInput
@@ -70,7 +50,7 @@ export function CreateWalletScreen() {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Creating..." : "Create wallet"}
+          {loading ? "Creating..." : "Continue"}
         </Text>
       </Pressable>
     </View>
