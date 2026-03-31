@@ -2,6 +2,9 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { WelcomeScreen } from "../../features/onboarding/WelcomeScreen";
 import { SetupScreen } from "../../features/onboarding/SetupScreen";
+import { SplashScreen } from "../../features/home/SplashScreen";
+import { useBootstrap } from "../bootstrap/useBootstrap";
+import { useAppStore } from "../../store/useAppStore";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -11,9 +14,17 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
+  useBootstrap();
+
+  const isBootstrapped = useAppStore((state) => state.isBootstrapped);
+  const hasSeenOnboarding = useAppStore((state) => state.hasSeenOnboarding);
+
+  if (!isBootstrapped) {
+    return <SplashScreen />;
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName="Welcome"
       screenOptions={{
         headerStyle: {
           backgroundColor: "#0B1220",
@@ -24,16 +35,19 @@ export function RootNavigator() {
         },
       }}
     >
-      <Stack.Screen
-        name="Welcome"
-        component={WelcomeScreen}
-        options={{ title: "Wallet Setup" }}
-      />
-      <Stack.Screen
-        name="Setup"
-        component={SetupScreen}
-        options={{ title: "Next Step" }}
-      />
+      {!hasSeenOnboarding ? (
+        <Stack.Screen
+          name="Welcome"
+          component={WelcomeScreen}
+          options={{ title: "Wallet Setup" }}
+        />
+      ) : (
+        <Stack.Screen
+          name="Setup"
+          component={SetupScreen}
+          options={{ title: "Home" }}
+        />
+      )}
     </Stack.Navigator>
   );
 }

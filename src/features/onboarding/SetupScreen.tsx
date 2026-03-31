@@ -4,9 +4,10 @@ import { StyleSheet, Text, View } from "react-native";
 export function SetupScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Step 3 is working</Text>
+      <Text style={styles.title}>Home placeholder</Text>
       <Text style={styles.subtitle}>
-        Stack navigation works. Next we will add app state and bootstrap flow.
+        Onboarding is complete. This is where the wallet home screen will go
+        next.
       </Text>
     </View>
   );

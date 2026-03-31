@@ -1,23 +1,20 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../app/navigation/RootNavigator";
+import { useAppStore } from "../../store/useAppStore";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Welcome">;
+export function WelcomeScreen() {
+  const completeOnboarding = useAppStore((state) => state.completeOnboarding);
 
-export function WelcomeScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tether Wallet Take Home</Text>
       <Text style={styles.subtitle}>
-        Navigation setup is ready. This is our first real app flow.
+        This is the onboarding entry. Next we will replace this with
+        create/import wallet flow.
       </Text>
 
-      <Pressable
-        style={styles.button}
-        onPress={() => navigation.navigate("Setup")}
-      >
-        <Text style={styles.buttonText}>Go to next screen</Text>
+      <Pressable style={styles.button} onPress={completeOnboarding}>
+        <Text style={styles.buttonText}>Finish onboarding</Text>
       </Pressable>
     </View>
   );
