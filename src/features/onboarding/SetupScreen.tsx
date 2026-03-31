@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -15,6 +15,7 @@ import { biometricService } from "../../services/biometrics/biometricService";
 import { balanceService } from "../../services/wdk/balanceService";
 import { LoadingCard } from "../../components/LoadingCard";
 import { EmptyState } from "../../components/EmptyState";
+import { ErrorState } from "../../components/ErrorState";
 import type { WalletSummary } from "../../types/wallet";
 import type { BalanceItem } from "../../types/balance";
 
@@ -42,6 +43,7 @@ function maskAddress(address?: string) {
 export function SetupScreen({ navigation }: Props) {
   const [balances, setBalances] = useState<BalanceItem[]>([]);
   const [loadingBalances, setLoadingBalances] = useState(true);
+  const [balancesError, setBalancesError] = useState("");
 
   const wallets = useWalletStore((state) => state.wallets);
   const activeWalletId = useWalletStore((state) => state.activeWalletId);
@@ -55,36 +57,28 @@ export function SetupScreen({ navigation }: Props) {
 
   const activeWallet = wallets.find((wallet) => wallet.id === activeWalletId);
 
-  useEffect(() => {
-    let mounted = true;
+  const loadBalances = useCallback(async () => {
+    try {
+      setLoadingBalances(true);
+      setBalancesError("");
 
-    const loadBalances = async () => {
-      try {
-        setLoadingBalances(true);
-        const nextBalances = await balanceService.getBalances(
-          activeWallet?.address
-        );
-
-        if (mounted) {
-          setBalances(nextBalances);
-        }
-      } catch (error) {
-        if (mounted) {
-          setBalances([]);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingBalances(false);
-        }
-      }
-    };
-
-    loadBalances();
-
-    return () => {
-      mounted = false;
-    };
+      const nextBalances = await balanceService.getBalances(
+        activeWallet?.address
+      );
+      setBalances(nextBalances);
+    } catch (error) {
+      setBalances([]);
+      setBalancesError(
+        error instanceof Error ? error.message : "Failed to load balances"
+      );
+    } finally {
+      setLoadingBalances(false);
+    }
   }, [activeWallet?.address]);
+
+  useEffect(() => {
+    loadBalances();
+  }, [loadBalances]);
 
   const handleAddSecondWallet = async () => {
     const newWallet = generateSecondFakeWallet();
@@ -164,9 +158,21 @@ export function SetupScreen({ navigation }: Props) {
         </Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Balances</Text>
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>Balances</Text>
+        <Pressable onPress={loadBalances}>
+          <Text style={styles.refreshText}>Refresh</Text>
+        </Pressable>
+      </View>
+
       {loadingBalances ? (
         <LoadingCard text="Loading balances..." />
+      ) : balancesError ? (
+        <ErrorState
+          title="Could not load balances"
+          description={balancesError}
+          onRetry={loadBalances}
+        />
       ) : balances.length === 0 ? (
         <EmptyState
           title="No balances available"
@@ -310,12 +316,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 12,
   },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 12,
+  },
   sectionTitle: {
     color: "#E2E8F0",
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 12,
     marginTop: 24,
+  },
+  refreshText: {
+    color: "#60A5FA",
+    fontSize: 14,
+    fontWeight: "600",
   },
   balanceCard: {
     backgroundColor: "#111827",

@@ -4,7 +4,7 @@ import type { BalanceItem } from "../../types/balance";
 export const balanceService = {
   async getBalances(walletAddress?: string): Promise<BalanceItem[]> {
     if (!walletAddress) {
-      return [];
+      throw new Error("Missing wallet address");
     }
 
     const balances = await mockWalletProvider.getBalances(walletAddress);
