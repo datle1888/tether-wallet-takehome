@@ -1,6 +1,7 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useWalletStore } from "../../store/useWalletStore";
+import { useAppStore } from "../../store/useAppStore";
 import { appStorage } from "../../services/storage/appStorage";
 import type { WalletSummary } from "../../types/wallet";
 
@@ -24,6 +25,9 @@ export function SetupScreen({ navigation }: Props) {
   const wallets = useWalletStore((state) => state.wallets);
   const activeWalletId = useWalletStore((state) => state.activeWalletId);
   const addWallet = useWalletStore((state) => state.addWallet);
+  const resetWalletState = useWalletStore((state) => state.resetWalletState);
+
+  const resetAppState = useAppStore((state) => state.resetAppState);
 
   const activeWallet = wallets.find((wallet) => wallet.id === activeWalletId);
 
@@ -33,6 +37,21 @@ export function SetupScreen({ navigation }: Props) {
 
     await appStorage.setWallets(nextWallets);
     addWallet(newWallet);
+  };
+
+  const handleResetApp = async () => {
+    Alert.alert("Reset app", "Clear onboarding and wallet data?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Reset",
+        style: "destructive",
+        onPress: async () => {
+          await appStorage.clearAppData();
+          resetWalletState();
+          resetAppState();
+        },
+      },
+    ]);
   };
 
   return (
@@ -63,6 +82,13 @@ export function SetupScreen({ navigation }: Props) {
         onPress={handleAddSecondWallet}
       >
         <Text style={styles.buttonText}>Add another demo wallet</Text>
+      </Pressable>
+
+      <Pressable
+        style={[styles.button, styles.dangerButton]}
+        onPress={handleResetApp}
+      >
+        <Text style={styles.buttonText}>Reset app data</Text>
       </Pressable>
     </View>
   );
@@ -113,6 +139,9 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: "#1D4ED8",
+  },
+  dangerButton: {
+    backgroundColor: "#DC2626",
   },
   buttonText: {
     color: "#FFFFFF",

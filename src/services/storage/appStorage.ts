@@ -46,4 +46,12 @@ export const appStorage = {
   async getActiveWalletId(): Promise<string | null> {
     return AsyncStorage.getItem(STORAGE_KEYS.ACTIVE_WALLET_ID);
   },
+
+  async clearAppData() {
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.HAS_SEEN_ONBOARDING,
+      STORAGE_KEYS.WALLETS,
+      STORAGE_KEYS.ACTIVE_WALLET_ID,
+    ]);
+  },
 };

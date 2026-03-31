@@ -7,6 +7,7 @@ type WalletStore = {
   setWallets: (wallets: WalletSummary[]) => void;
   addWallet: (wallet: WalletSummary) => void;
   setActiveWalletId: (walletId: string) => void;
+  resetWalletState: () => void;
 };
 
 export const useWalletStore = create<WalletStore>((set) => ({
@@ -18,4 +19,9 @@ export const useWalletStore = create<WalletStore>((set) => ({
       wallets: [...state.wallets, wallet],
     })),
   setActiveWalletId: (walletId) => set({ activeWalletId: walletId }),
+  resetWalletState: () =>
+    set({
+      wallets: [],
+      activeWalletId: null,
+    }),
 }));
