@@ -1,20 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { useAppStore } from "../../store/useAppStore";
+import { appStorage } from "../../services/storage/appStorage";
 
 export function WelcomeScreen() {
-  const completeOnboarding = useAppStore((state) => state.completeOnboarding);
+  const [loading, setLoading] = useState(false);
+  const setHasSeenOnboarding = useAppStore(
+    (state) => state.setHasSeenOnboarding
+  );
+
+  const handleFinishOnboarding = async () => {
+    try {
+      setLoading(true);
+      await appStorage.setHasSeenOnboarding(true);
+      setHasSeenOnboarding(true);
+    } catch (error) {
+      console.log("Failed to save onboarding state", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tether Wallet Take Home</Text>
       <Text style={styles.subtitle}>
-        This is the onboarding entry. Next we will replace this with
-        create/import wallet flow.
+        This onboarding state will now persist even after app reload.
       </Text>
 
-      <Pressable style={styles.button} onPress={completeOnboarding}>
-        <Text style={styles.buttonText}>Finish onboarding</Text>
+      <Pressable
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleFinishOnboarding}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Saving..." : "Finish onboarding"}
+        </Text>
       </Pressable>
     </View>
   );
@@ -45,6 +66,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: "#FFFFFF",
